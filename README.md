@@ -1,2 +1,2 @@
 # customer
-We manage events for multiple users
+We do manage events for multiple users
