@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
+          xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
+    granite:class="action-type-dialog"
+    jcr:title="Events Form Container"
+    sling:resourceType="granite/ui/components/coral/foundation/container">
+    <items jcr:primaryType="nt:unstructured">
+        <backendUrl
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                fieldLabel="Backend API"
+                fieldDescription="Endpoint URL of the Backend API to post user information"
+                name="./backendUrl"
+                required="{Boolean}true"/>
+        <errorMessage
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                fieldLabel="Error Message"
+                fieldDescription="Error Message to display if form data is not submitted to end point successfully"
+                name="./eventsErrorMessage"/>
+    </items>
+    <granite:data
+            jcr:primaryType="nt:unstructured"
+            showhidetargetvalue="customer/components/form/actions/submitEvent"
+            usesRedirect="true"/>
+</jcr:root>

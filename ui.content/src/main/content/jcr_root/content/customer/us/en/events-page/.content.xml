@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+    jcr:primaryType="cq:Page">
+    <jcr:content
+        cq:lastModified="{Date}2024-02-05T09:49:35.983+11:00"
+        cq:lastModifiedBy="admin"
+        cq:template="/conf/customer/settings/wcm/templates/page-content"
+        jcr:primaryType="cq:PageContent"
+        jcr:title="Events Page"
+        sling:resourceType="customer/components/page"
+        pwaCachestrategy="staleWhileRevalidate"
+        pwaDisplay="standalone"
+        pwaOrientation="any">
+        <root
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="customer/components/container"
+            layout="responsiveGrid">
+            <container
+                jcr:primaryType="nt:unstructured"
+                sling:resourceType="customer/components/container"
+                layout="responsiveGrid">
+                <title
+                    jcr:lastModified="{Date}2024-01-31T20:47:36.629+11:00"
+                    jcr:lastModifiedBy="admin"
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="The Customer | Events"
+                    sling:resourceType="customer/components/title"/>
+                <container
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="customer/components/container"
+                    layout="responsiveGrid">
+                    <container_1420562691
+                        jcr:created="{Date}2024-01-31T08:40:44.528+11:00"
+                        jcr:createdBy="admin"
+                        jcr:lastModified="{Date}2024-01-31T08:40:52.335+11:00"
+                        jcr:lastModifiedBy="admin"
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="customer/components/container"
+                        layout="responsiveGrid">
+                        <cq:responsive jcr:primaryType="nt:unstructured">
+                            <default
+                                jcr:primaryType="nt:unstructured"
+                                offset="2"
+                                width="6"/>
+                        </cq:responsive>
+                        <image
+                            jcr:created="{Date}2024-01-31T08:53:00.315+11:00"
+                            jcr:createdBy="admin"
+                            jcr:lastModified="{Date}2024-01-31T09:05:48.291+11:00"
+                            jcr:lastModifiedBy="admin"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="customer/components/image"
+                            fileReference="/content/dam/customer/events2.jpg"
+                            imageFromPageImage="false"/>
+                        <text
+                            jcr:created="{Date}2024-01-31T08:50:49.144+11:00"
+                            jcr:createdBy="admin"
+                            jcr:lastModified="{Date}2024-01-31T08:52:03.047+11:00"
+                            jcr:lastModifiedBy="admin"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="customer/components/text"
+                            text="&lt;p>Welcome to The Customer events. We manage it all. Please register below with your name, email and id&amp;nbsp;&lt;/p>&#xd;&#xa;"
+                            textIsRich="true"/>
+                        <container_366870249
+                            jcr:created="{Date}2024-01-31T15:09:38.936+11:00"
+                            jcr:createdBy="admin"
+                            jcr:lastModified="{Date}2024-02-05T09:49:35.980+11:00"
+                            jcr:lastModifiedBy="admin"
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Events Form"
+                            sling:resourceType="customer/components/form/container"
+                            actionType="customer/components/form/actions/submitEvent"
+                            backendUrl="http://localhost:4502/bin/services/mockApi"
+                            eventsErrorMessage="Error in posting user details"
+                            redirect="/content/customer/us/en/events-page/thank-you">
+                            <text
+                                jcr:created="{Date}2024-01-31T15:10:12.249+11:00"
+                                jcr:createdBy="admin"
+                                jcr:lastModified="{Date}2024-01-31T20:51:22.944+11:00"
+                                jcr:lastModifiedBy="admin"
+                                jcr:primaryType="nt:unstructured"
+                                jcr:title="Name"
+                                sling:resourceType="customer/components/form/text"
+                                name="name"
+                                required="true"
+                                requiredMessage="Name is a required field"
+                                rows="2"
+                                type="text"/>
+                            <text_copy
+                                jcr:created="{Date}2024-01-31T15:10:12.249+11:00"
+                                jcr:createdBy="admin"
+                                jcr:lastModified="{Date}2024-01-31T20:55:31.044+11:00"
+                                jcr:lastModifiedBy="admin"
+                                jcr:primaryType="nt:unstructured"
+                                jcr:title="Email"
+                                sling:resourceType="customer/components/form/text"
+                                constraintMessage="Please enter appropriate email"
+                                name="email"
+                                required="true"
+                                requiredMessage="Email Field is required"
+                                rows="2"
+                                type="email"/>
+                            <text_copy_copy
+                                jcr:created="{Date}2024-01-31T15:10:12.249+11:00"
+                                jcr:createdBy="admin"
+                                jcr:lastModified="{Date}2024-01-31T20:50:58.192+11:00"
+                                jcr:lastModifiedBy="admin"
+                                jcr:primaryType="nt:unstructured"
+                                jcr:title="Id"
+                                sling:resourceType="customer/components/form/text"
+                                name="id"
+                                required="true"
+                                requiredMessage="ID is a required field"
+                                rows="2"
+                                type="text"/>
+                            <button
+                                jcr:created="{Date}2024-01-31T15:10:51.152+11:00"
+                                jcr:createdBy="admin"
+                                jcr:lastModified="{Date}2024-02-05T09:27:55.893+11:00"
+                                jcr:lastModifiedBy="admin"
+                                jcr:primaryType="nt:unstructured"
+                                jcr:title="Register"
+                                sling:resourceType="customer/components/form/button"
+                                type="submit"/>
+                        </container_366870249>
+                    </container_1420562691>
+                </container>
+            </container>
+        </root>
+        <cq:featuredimage
+            jcr:lastModified="{Date}2024-01-31T09:06:08.112+11:00"
+            jcr:lastModifiedBy="admin"
+            jcr:primaryType="nt:unstructured"
+            sling:resourceType="core/wcm/components/image/v3/image"
+            altValueFromDAM="false"/>
+    </jcr:content>
+    <thank-you/>
+</jcr:root>

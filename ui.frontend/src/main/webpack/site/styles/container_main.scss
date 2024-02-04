@@ -1,0 +1,128 @@
+
+main.container {
+    padding: .5em 1em;
+}
+
+body, h1, h2, h3, p, ul {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f5f5f5;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+
+header {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 0;
+}
+
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+}
+
+nav li {
+    margin-right: 20px;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+main {
+    padding: 20px 0;
+}
+
+.title h1 {
+    font-size: 36px;
+    color: #333;
+}
+
+.image img {
+    max-width: 100%;
+    height: auto;
+}
+
+.text p {
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+form {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.cmp-form-text {
+    margin-bottom: 15px;
+}
+
+.cmp-form-text label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.cmp-form-text input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+}
+
+.cmp-form-button button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+footer {
+    margin-top: 20px;
+    padding: 20px 0;
+    background-color: #333;
+    color: #fff;
+}
+
+.cmp-separator__horizontal-rule {
+    border: 1px solid #ccc;
+}
+
+.cmp-text p {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    nav ul {
+        flex-direction: column;
+    }
+
+    nav li {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+}
