@@ -1,14 +1,13 @@
 package au.com.customer.core.internal;
 
 import com.adobe.cq.wcm.core.components.models.form.Field;
+import com.google.gson.JsonObject;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.NonExistingResource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.commons.json.JSONException;
-import org.apache.sling.commons.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +19,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class CustomerUtils {
@@ -37,12 +35,8 @@ public class CustomerUtils {
      * @return response from the API
      * @throws IOException if the IO operations fail
      */
-    public static String makeHttpRequest(String apiUrl, JSONObject requestBody) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) new URL(apiUrl).openConnection();
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty("Content-Type", "application/json");
-        connection.setDoOutput(true);
-        connection.setRequestProperty("Authorization", "Basic " + encodeCredentials("admin", "admin"));
+    public static String makeHttpRequest(String apiUrl, JsonObject requestBody) throws IOException {
+        HttpURLConnection connection = getHttpURLConnection(apiUrl);
         try (OutputStream os = connection.getOutputStream()) {
             byte[] input = requestBody.toString().getBytes(StandardCharsets.UTF_8);
             os.write(input, 0, input.length);
@@ -54,8 +48,22 @@ public class CustomerUtils {
         }
     }
 
-    private static String encodeCredentials(String username, String password) {
-        String credentials = username + ":" + password;
+    private static HttpURLConnection getHttpURLConnection(final String apiUrl) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) new URL(apiUrl).openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setDoOutput(true);
+        connection.setRequestProperty("Authorization", "Basic " + encodeCredentials());
+        return connection;
+    }
+
+    /**
+     * For the current project specific needs, this method assumes the default admin credentials to call Mock API
+     *
+     * @return encoded credentials
+     */
+    private static String encodeCredentials() {
+        String credentials = "admin" + ":" + "admin";
         return Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
     }
 

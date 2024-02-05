@@ -116,6 +116,12 @@ footer {
     line-height: 1.5;
 }
 
+.cmp-form-error__item {
+    font-size: xx-large;
+    color: red;
+    padding-bottom: 20px;
+}
+
 @media (max-width: 768px) {
     nav ul {
         flex-direction: column;

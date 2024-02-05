@@ -3,6 +3,7 @@
 This is The Customer project which has a form, text, title and image components. Users can register events and the information is stored in JCR
 
 ## Mocked API
+Application assumes default admin credentials: admin/admin 
 
 Configure the mocked API as http://localhost:4502/bin/services/mockApi
 
@@ -11,6 +12,10 @@ For simulating failed API scenario, use http://localhost:4502/bin/services/mockA
 ## Service User:
 
 Create a service user namely ugc-serice and give write permissions under /content/usergenerated/customer
+
+## Assumptions
+
+Form ID is unique for each user as it is used to save the details in JCR
 
 ## Modules
 

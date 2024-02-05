@@ -34,14 +34,15 @@ public class ResourceResolverHelperServiceImpl implements ResourceResolverHelper
 
 
     public ResourceResolver getUgcResolver() {
+        ResourceResolver resourceResolver = null;
         try {
             final Map<String, Object> param = new HashMap<>();
             param.put(ResourceResolverFactory.SUBSERVICE, "customer-ugc-write-service");
-            return resolverFactory.getServiceResourceResolver(param);
+            resourceResolver = resolverFactory.getServiceResourceResolver(param);
         } catch (final LoginException e) {
             LOGGER.error("Error while getting the ResourceResolver ", e);
         }
-        return null;
+        return resourceResolver;
     }
 
 }
