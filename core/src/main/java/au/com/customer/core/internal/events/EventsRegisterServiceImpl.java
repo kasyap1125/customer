@@ -12,19 +12,17 @@ import com.day.cq.wcm.foundation.forms.FormsHandlingServletHelper;
 import com.day.cq.wcm.foundation.forms.ValidationInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.json.JSONException;
 import org.apache.sling.commons.json.JSONObject;
-import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.propertytypes.ServiceDescription;
@@ -46,8 +44,6 @@ import javax.servlet.ServletException;
 public class EventsRegisterServiceImpl implements EventsRegisterService {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventsRegisterServiceImpl.class);
-
-    private static final long serialVersionUID = 1L;
 
     private static final String ATTR_RESOURCE = FormsHandlingServletHelper.class.getName() + "/resource";
 
@@ -144,17 +140,21 @@ public class EventsRegisterServiceImpl implements EventsRegisterService {
 
     private void saveDataToJcr(final JSONObject formData, final String apiResp, final Resource formResource) {
         try (ResourceResolver resourceResolver = resolverHelperService.getUgcResolver()) {
-            final Resource resource = ResourceUtil.getOrCreateResource(resourceResolver, "/content/usergenerated/"
-                    + formResource.getPath().replace("/content", org.apache.commons.lang3.StringUtils.EMPTY),
-                    "sling:Folder","sling:Folder", true);
-            final String userName = (String) formData.get("name");
-            final Resource userRes = ResourceUtil.getOrCreateResource(resourceResolver,
-                    resource.getPath() + "/" + userName.replaceAll(" ", "-") + System.currentTimeMillis(),
-                    "sling:Folder","sling:Folder", true);
-            final ModifiableValueMap modifiableValueMap = userRes.adaptTo(ModifiableValueMap.class);
-            modifiableValueMap.putAll(new ObjectMapper().readValue(formData.toString(), HashMap.class));
-            modifiableValueMap.put("apiRespinse", apiResp);
-            resourceResolver.commit();
+            if (null != resourceResolver) {
+                final Resource resource = ResourceUtil.getOrCreateResource(resourceResolver, "/content/usergenerated/"
+                                + formResource.getPath().replace("/content", StringUtils.EMPTY),
+                        "sling:Folder", "sling:Folder", false);
+                final String userName = (String) formData.get("name");
+                final Resource userRes = ResourceUtil.getOrCreateResource(resourceResolver,
+                        resource.getPath() + "/" + userName.replaceAll(" ", "-") + System.currentTimeMillis(),
+                        "sling:Folder", "sling:Folder", true);
+                final ModifiableValueMap modifiableValueMap = userRes.adaptTo(ModifiableValueMap.class);
+                modifiableValueMap.putAll(new ObjectMapper().readValue(formData.toString(), HashMap.class));
+                modifiableValueMap.put("apiRespinse", apiResp);
+                resourceResolver.commit();
+            } else {
+                LOG.error("Unable to save the user information as the service user ");
+            }
         }  catch (PersistenceException | JSONException | JsonProcessingException e) {
             LOG.error("Unable to save data");
         }

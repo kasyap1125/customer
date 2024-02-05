@@ -7,5 +7,6 @@
         <include pattern="/content/dam/customer/jcr:content(/.*)?"/>
     </filter>
     <filter root="/content/dam/customer/asset.jpg" mode="merge"/>
+    <filter root="/content/dam/customer/events2.jpg" mode="merge"/>
     <filter root="/content/experience-fragments/customer" mode="merge"/>
 </workspaceFilter>
