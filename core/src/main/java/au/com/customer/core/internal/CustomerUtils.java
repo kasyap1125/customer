@@ -30,22 +30,31 @@ public class CustomerUtils {
      * Utility method to make an HTTP call. This method assumes that the mocked API is from local AEM instance
      * and applies basic authentication with default credentials
      *
-     * @param apiUrl API URL
+     * @param apiUrl      API URL
      * @param requestBody request body from front end
      * @return response from the API
      * @throws IOException if the IO operations fail
      */
-    public static String makeHttpRequest(String apiUrl, JsonObject requestBody) throws IOException {
+    public static JsonObject makeHttpRequest(String apiUrl, JsonObject requestBody) throws IOException {
+        final JsonObject resp = new JsonObject();
         HttpURLConnection connection = getHttpURLConnection(apiUrl);
         try (OutputStream os = connection.getOutputStream()) {
             byte[] input = requestBody.toString().getBytes(StandardCharsets.UTF_8);
             os.write(input, 0, input.length);
         }
-        try (InputStream inputStream = connection.getInputStream()) {
-            String responseData = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-            LOG.debug("Http Call returned in response: {}", responseData);
-            return responseData;
+        final int responseCode = connection.getResponseCode();
+        if (responseCode >= 200 && responseCode < 300) {
+            try (InputStream inputStream = connection.getInputStream()) {
+                String responseData = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+                resp.addProperty("status", responseCode);
+                resp.addProperty("response", responseData);
+                LOG.debug("Http Call returned in response: {}", responseData);
+            }
+        } else  {
+            resp.addProperty("status", responseCode);
+            LOG.error("Status code is {}", responseCode);
         }
+        return resp;
     }
 
     private static HttpURLConnection getHttpURLConnection(final String apiUrl) throws IOException {

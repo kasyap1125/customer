@@ -3,7 +3,6 @@ package au.com.customer.core.internal.servlets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.propertytypes.ServiceDescription;
@@ -32,6 +31,7 @@ public class MockApi extends SlingAllMethodsServlet {
         resp.setContentType("application/json");
         if (StringUtils.equals("true", failure)) {
             resp.getWriter().write("{\"result\":\"failure\"}");
+            resp.setStatus(500);
         } else {
             resp.getWriter().write("{\"result\":\"success\"}");
         }

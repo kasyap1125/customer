@@ -1,17 +1,15 @@
 package au.com.customer.core.internal.events;
 
-import static au.com.customer.core.internal.CustomerUtils.getFormFieldNames;
-import static au.com.customer.core.internal.CustomerUtils.getMappedRedirect;
-
+import au.com.customer.core.internal.CustomerConstants;
 import au.com.customer.core.internal.CustomerUtils;
+import au.com.customer.core.internal.exception.ErrorCode;
+import au.com.customer.core.internal.exception.SubmissionFailureException;
 import au.com.customer.core.services.customer.ResourceResolverHelperService;
 import au.com.customer.core.services.events.EventsRegisterService;
 import com.day.cq.wcm.api.components.ComponentContext;
 import com.day.cq.wcm.foundation.forms.FormsHandlingRequest;
-import com.day.cq.wcm.foundation.forms.FormsHandlingServletHelper;
 import com.day.cq.wcm.foundation.forms.ValidationInfo;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -21,6 +19,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.propertytypes.ServiceDescription;
@@ -28,138 +27,138 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 
 @Component(service = { EventsRegisterService.class })
 @ServiceDescription("Event registration service")
 public class EventsRegisterServiceImpl implements EventsRegisterService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EventsRegisterServiceImpl.class);
-
-    private static final String ATTR_RESOURCE = FormsHandlingServletHelper.class.getName() + "/resource";
-
-    private static final String PN_FORM_ENDPOINT_URL = "backendUrl";
-
-    private static final Set<String> INTERNAL_PARAMETER = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            ":formstart",
-            "_charset_",
-            ":redirect",
-            ":cq_csrf_token"
-    )));
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventsRegisterServiceImpl.class);
 
     @Reference
     ResourceResolverHelperService resolverHelperService;
 
     public void handleFormRequest(final SlingHttpServletRequest req,
                                   final SlingHttpServletResponse resp) throws ServletException, IOException {
-        boolean processFormApiSuccess = false;
-        final Resource formContainerResource = req.getResource();
-        final ValueMap valueMap = formContainerResource.adaptTo(ValueMap.class);
-        JsonObject formData = new JsonObject();
-        if (valueMap != null) {
-            String endPointUrl = valueMap.get(PN_FORM_ENDPOINT_URL, String.class);
-            String result = StringUtils.EMPTY;
-            if (StringUtils.isNotEmpty(endPointUrl)) {
-                formData = getJsonOfRequestParameters(req);
-                if (formData.size() > 0 && formData.has("name")) {
-                    final String response = CustomerUtils.makeHttpRequest(endPointUrl, formData);
-                    if (StringUtils.isNotBlank(response)) {
-                        final JsonObject apiResp = JsonParser.parseString(response).getAsJsonObject();
-                        result = apiResp.get("result").getAsString();
-                        if (StringUtils.equals(result, "success")) {
+        try {
+            boolean processFormApiSuccess = false;
+            final Resource formContainerResource = req.getResource();
+            final ValueMap valueMap = formContainerResource.adaptTo(ValueMap.class);
+            if (valueMap != null) {
+                String endPointUrl = valueMap.get(CustomerConstants.PN_FORM_ENDPOINT_URL, String.class);
+                if (StringUtils.isNotEmpty(endPointUrl)) {
+                    final JsonObject formData = createJsonOfRequestParameters(req);
+                    if (isValidRequest(formData)) {
+                        final JsonObject response = CustomerUtils.makeHttpRequest(endPointUrl, formData);
+                        String result = null;
+                        final int responseCode = response.get("status").getAsInt();
+                        if (responseCode >= 200 && responseCode < 300) {
+                            result = response.get("response").getAsString();
                             processFormApiSuccess = true;
-                        } else {
-                            saveDataToJcr(formData, result, formContainerResource, req, false);
                         }
+                        handleDataAndRedirect(formData, result, valueMap, req, resp, processFormApiSuccess);
                     }
                 }
             }
-            saveDataAndsendRedirect(formData, result, valueMap, req, resp, processFormApiSuccess);
+            LOGGER.error("Unable to get form container properties");
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } catch (final SubmissionFailureException se) {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            LOGGER.error("Error in submitting the form {}", se.getMessage(), se.getCause());
         }
     }
 
-    private JsonObject getJsonOfRequestParameters(final SlingHttpServletRequest request) {
-        Set<String> formFieldNames = getFormFieldNames(request);
+    private static boolean isValidRequest(final JsonObject formData) {
+        return formData.size() > 0 && formData.has(CustomerConstants.FORM_FIELD_NAME)
+                && formData.has(CustomerConstants.FORM_FIELD_EMAIL) && formData.has(CustomerConstants.FORM_FIELD_ID);
+    }
+
+    private JsonObject createJsonOfRequestParameters(final SlingHttpServletRequest request) {
+        Set<String> formFieldNames = CustomerUtils.getFormFieldNames(request);
         JsonObject jsonObj = new JsonObject();
         Map<String, String[]> params = request.getParameterMap();
 
         for (Map.Entry<String, String[]> entry : params.entrySet()) {
-            if (!INTERNAL_PARAMETER.contains(entry.getKey()) && formFieldNames.contains(entry.getKey())) {
+            if (!CustomerConstants.INTERNAL_PARAMETERS.contains(entry.getKey()) && formFieldNames.contains(entry.getKey())) {
                 String[] v = entry.getValue();
-                String o = (v.length == 1) ? v[0] : Arrays.toString(v);
+                String o = (v.length == 1) ? v[0] : StringUtils.EMPTY;
                 jsonObj.addProperty(entry.getKey(), o);
             }
         }
         return jsonObj;
     }
 
-    private void saveDataAndsendRedirect(final JsonObject formData, final String apiResp, final ValueMap valueMap,
-                                         final SlingHttpServletRequest request,
-                                         final SlingHttpServletResponse response, final boolean processFormApiSuccess)
-            throws ServletException {
-        String redirect = getMappedRedirect(valueMap.get("redirect", String.class), request.getResourceResolver());
-        String errorMessage = valueMap.get("eventsErrorMessage", String.class);
-        FormsHandlingRequest formRequest = new FormsHandlingRequest(request);
-        final Resource formResource = (Resource) request.getAttribute(ATTR_RESOURCE);
+    private void handleDataAndRedirect(final JsonObject formData, final String apiResp, final ValueMap valueMap,
+                                       final SlingHttpServletRequest request,
+                                       final SlingHttpServletResponse response, final boolean processFormApiSuccess)
+            throws ServletException, SubmissionFailureException {
+        final Resource formResource = (Resource) request.getAttribute(CustomerConstants.ATTR_RESOURCE);
         try {
-            if (StringUtils.isNotEmpty(redirect) && processFormApiSuccess) {
-                if (saveDataToJcr(formData, apiResp, formResource, request, true)) {
+            if (processFormApiSuccess && saveToJcr(formData, apiResp, formResource)) {
+                final String redirect = CustomerUtils.getMappedRedirect(valueMap.get(
+                        CustomerConstants.REDIRECT_PARAM_NAME, String.class), request.getResourceResolver());
+                if (StringUtils.isNotEmpty(redirect)) {
                     response.sendRedirect(redirect);
+                } else {
+                    throw new SubmissionFailureException(ErrorCode.REDIRECT_NOT_CONFIGURED);
                 }
             } else {
-                if (!processFormApiSuccess && StringUtils.isNotEmpty(errorMessage)) {
+                final String errorMessage = valueMap.get(CustomerConstants.EVENTS_ERROR_MESSAGE_PARAM_NAME, String.class);
+                if (StringUtils.isNotEmpty(errorMessage)) {
                     ValidationInfo validationInfo = ValidationInfo.createValidationInfo(request);
                     validationInfo.addErrorMessage(null, errorMessage);
                 }
-                request.removeAttribute(ATTR_RESOURCE);
-                request.removeAttribute(ComponentContext.BYPASS_COMPONENT_HANDLING_ON_INCLUDE_ATTRIBUTE);
-                RequestDispatcher requestDispatcher = request.getRequestDispatcher(formResource);
-                if (requestDispatcher != null) {
-                    requestDispatcher.forward(formRequest, response);
-                } else {
-                    throw new IOException("can't get request dispatcher to forward the response");
-                }
+                forwardRequest(request, response, formResource);
             }
-        } catch (IOException var13) {
-            LOG.error("Error redirecting to {}", redirect);
+        } catch (final IOException e) {
+            throw new SubmissionFailureException(e.getCause(), ErrorCode.FAILED_REDIRECT);
         }
     }
 
-    private boolean saveDataToJcr(final JsonObject formData, final String apiResp, final Resource formResource,
-                                  final SlingHttpServletRequest request, final boolean processFormApiSuccess) {
-        boolean currentFlag = processFormApiSuccess;
+    private static void forwardRequest(final SlingHttpServletRequest request, final SlingHttpServletResponse response,
+                                       final Resource formResource) throws ServletException,
+            IOException, SubmissionFailureException {
+        request.removeAttribute(CustomerConstants.ATTR_RESOURCE);
+        request.removeAttribute(ComponentContext.BYPASS_COMPONENT_HANDLING_ON_INCLUDE_ATTRIBUTE);
+        RequestDispatcher requestDispatcher = request.getRequestDispatcher(formResource);
+        if (requestDispatcher != null) {
+            FormsHandlingRequest formRequest = new FormsHandlingRequest(request);
+            requestDispatcher.forward(formRequest, response);
+        } else {
+            throw new SubmissionFailureException(ErrorCode.DISPATCH_FAILED);
+        }
+    }
+
+    private boolean saveToJcr(final JsonObject formData, final String apiResp, final Resource formResource)
+            throws SubmissionFailureException {
+        boolean savedInJcr = false;
         try (ResourceResolver resourceResolver = resolverHelperService.getUgcResolver()) {
-            if (null != resourceResolver) {
-                final Resource resource = ResourceUtil.getOrCreateResource(resourceResolver, "/content/usergenerated/"
-                                + formResource.getPath().replace("/content", StringUtils.EMPTY),
-                        "sling:Folder", "sling:Folder", false);
-                final String id = formData.get("id").getAsString();
-                final Resource userRes = ResourceUtil.getOrCreateResource(resourceResolver,
-                        resource.getPath() + "/" + id + System.currentTimeMillis(),
-                        "sling:Folder", "sling:Folder", true);
+            if (resourceResolver != null) {
+                final String path = CustomerConstants.CONTENT_PATH_PREFIX + formResource.getPath()
+                        .replace(CustomerConstants.CONTENT_ROOT, StringUtils.EMPTY);
+                final Resource resource = ResourceUtil.getOrCreateResource(resourceResolver, path, JcrResourceConstants.NT_SLING_FOLDER,
+                        JcrResourceConstants.NT_SLING_FOLDER, false);
+                final String id = formData.get(CustomerConstants.FORM_FIELD_ID).getAsString();
+                final Resource userRes = ResourceUtil.getOrCreateResource(resourceResolver, resource.getPath()
+                                + CustomerConstants.FORWARD_SLASH + id + System.currentTimeMillis(),
+                        JcrResourceConstants.NT_SLING_FOLDER ,JcrResourceConstants.NT_SLING_FOLDER, false);
                 final ModifiableValueMap modifiableValueMap = userRes.adaptTo(ModifiableValueMap.class);
-                if (null != modifiableValueMap) {
-                    modifiableValueMap.put("userId", id);
-                    modifiableValueMap.put("apiResponse", apiResp);
+                if (modifiableValueMap != null) {
+                    modifiableValueMap.put(CustomerConstants.USER_ID_FIELD, id);
+                    modifiableValueMap.put(CustomerConstants.API_RESPONSE_FIELD, apiResp);
                     resourceResolver.commit();
+                    savedInJcr = true;
                 }
             } else {
-                currentFlag = false;
-                ValidationInfo validationInfo = ValidationInfo.createValidationInfo(request);
-                validationInfo.addErrorMessage(null, "Something wrong in saving data");
-                LOG.error("Unable to save the user information as the write service is missing permissions, "
-                        + "please update access rights to service user.");
+                throw new SubmissionFailureException(ErrorCode.RESOLVER_NOT_FOUND);
             }
-        }  catch (PersistenceException e) {
-            LOG.error("Unable to save data");
+        } catch (final PersistenceException e) {
+            throw new SubmissionFailureException(e, ErrorCode.RESOLVER_NOT_FOUND);
         }
-        return currentFlag;
+        return savedInJcr;
     }
-
 }

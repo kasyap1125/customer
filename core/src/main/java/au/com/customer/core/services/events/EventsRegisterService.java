@@ -6,6 +6,9 @@ import org.apache.sling.api.SlingHttpServletResponse;
 import java.io.IOException;
 import javax.servlet.ServletException;
 
+/**
+ * This service is used for handling backend operations for the event registration process.
+ */
 public interface EventsRegisterService {
 
     /**
