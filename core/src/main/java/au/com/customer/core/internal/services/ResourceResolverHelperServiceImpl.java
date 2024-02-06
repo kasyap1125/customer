@@ -1,4 +1,4 @@
-package au.com.customer.core.internal.customer;
+package au.com.customer.core.internal.services;
 
 import au.com.customer.core.services.customer.ResourceResolverHelperService;
 import org.apache.sling.api.resource.LoginException;
@@ -34,15 +34,14 @@ public class ResourceResolverHelperServiceImpl implements ResourceResolverHelper
 
 
     public ResourceResolver getUgcResolver() {
-        ResourceResolver resourceResolver = null;
         try {
             final Map<String, Object> param = new HashMap<>();
             param.put(ResourceResolverFactory.SUBSERVICE, "customer-ugc-write-service");
-            resourceResolver = resolverFactory.getServiceResourceResolver(param);
+            return resolverFactory.getServiceResourceResolver(param);
         } catch (final LoginException e) {
             LOGGER.error("Error while getting the ResourceResolver ", e);
         }
-        return resourceResolver;
+        return null;
     }
 
 }

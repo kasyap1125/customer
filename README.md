@@ -1,4 +1,4 @@
-# Sample AEM project template
+# The Customer Project
 
 This is The Customer project which has a form, text, title and image components. Users can register events and the information is stored in JCR
 
