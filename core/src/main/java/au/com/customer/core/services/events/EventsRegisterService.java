@@ -19,7 +19,7 @@ public interface EventsRegisterService {
      * @param req request object
      * @param resp response object
      */
-    public void handleFormRequest(final SlingHttpServletRequest req, final SlingHttpServletResponse resp)
+    void handleFormRequest(final SlingHttpServletRequest req, final SlingHttpServletResponse resp)
             throws ServletException, IOException;
 
 }

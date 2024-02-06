@@ -27,9 +27,9 @@ import io.wcm.testing.mock.aem.junit5.AemContextCallback;
 /**
  * Sets up {@link AemContext} for unit tests in this application.
  */
-public final class AppAemContext {
+public final class CustomerAemContext {
 
-    private AppAemContext() {
+    private CustomerAemContext() {
         // static methods only
     }
 

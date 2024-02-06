@@ -1,4 +1,4 @@
-package au.com.customer.core.internal.events;
+package au.com.customer.core.internal.services;
 
 import au.com.customer.core.internal.CustomerConstants;
 import au.com.customer.core.internal.CustomerUtils;
@@ -49,7 +49,7 @@ public class EventsRegisterServiceImpl implements EventsRegisterService {
             final Resource formContainerResource = req.getResource();
             final ValueMap valueMap = formContainerResource.adaptTo(ValueMap.class);
             if (valueMap != null) {
-                String endPointUrl = valueMap.get(CustomerConstants.PN_FORM_ENDPOINT_URL, String.class);
+                String endPointUrl = valueMap.get(CustomerConstants.BACKEND_URL, String.class);
                 if (StringUtils.isNotEmpty(endPointUrl)) {
                     final JsonObject formData = createJsonOfRequestParameters(req);
                     if (isValidRequest(formData)) {
@@ -61,6 +61,7 @@ public class EventsRegisterServiceImpl implements EventsRegisterService {
                             processFormApiSuccess = true;
                         }
                         handleDataAndRedirect(formData, result, valueMap, req, resp, processFormApiSuccess);
+                        return;
                     }
                 }
             }

@@ -1,0 +1,30 @@
+{
+  "container": {
+    "jcr:primaryType": "nt:unstructured",
+    "actionType": "customer/components/form/actions/submitEvent",
+    "redirect" : "/content",
+    "errorMessage": "Error in submitting data",
+    "backendUrl": "http://localhost:4501/bin/services/mockApi",
+    "text": {
+      "jcr:primaryType": "nt:unstructured",
+      "sling:resourceType": "customer/components/form/text",
+      "name": "name"
+    },
+    "email": {
+      "jcr:primaryType": "nt:unstructured",
+      "sling:resourceType": "customer/components/form/text",
+      "name": "email"
+    },
+    "id": {
+      "jcr:primaryType": "nt:unstructured",
+      "sling:resourceType": "customer/components/form/text",
+      "name": "id"
+    }
+  },
+  "containerWithMappedRedirect": {
+    "jcr:primaryType": "nt:unstructured",
+    "actionType": "customer/components/form/actions/submitEvent",
+    "redirect" : "/content.html",
+    "errorMessage": "Error in submitting data"
+  }
+}
